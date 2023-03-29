@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
-import { Center, Heading, Image, ScrollView, Text, VStack } from 'native-base'
+import { Center, Heading, Image, ScrollView, Text, VStack, useToast } from 'native-base'
 import BackgroundImg from '@assets/background.png'
 import LogoSvg from '@assets/logo.svg'
 import { Input } from '@components/Input'
@@ -8,6 +8,9 @@ import { AuthNavigationRoutesProps } from '@routes/auth.routes'
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from "yup";
+import { useAuth } from '@hooks/useAuth'
+import { AppError } from '@utils/AppError'
+import { useState } from 'react'
 
 type FormDataProps = {
   email: string;
@@ -20,8 +23,10 @@ const signInSchema = yup.object({
 })
 
 export function SingIn() {
-
+  const { signIn } = useAuth()
   const navigation = useNavigation<AuthNavigationRoutesProps>()
+  const toast = useToast()
+  const [isLoading, setIsLoading] = useState(false)
 
   const {
     handleSubmit,
@@ -31,8 +36,22 @@ export function SingIn() {
     resolver: yupResolver(signInSchema)
   })
 
-  function handleSignUp({ email, password }: FormDataProps) {
+  async function handleSignIn({ email, password }: FormDataProps) {
+    try {
+      setIsLoading(true)
+      await signIn(email, password)
+    } catch (error) {
+      const isAppError = error instanceof AppError
 
+      const title = isAppError ? error.message : 'Não foi possível entrar. Tente novamente mais tarde.'
+      setIsLoading(false)
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+    }
   }
 
   function handleNewAccount() {
@@ -91,7 +110,11 @@ export function SingIn() {
             )}
           />
 
-          <Button title='Acessar' onPress={handleSubmit(handleSignUp)} />
+          <Button
+            title='Acessar'
+            onPress={handleSubmit(handleSignIn)}
+            isLoading={isLoading}
+          />
         </Center>
 
         <Center mt={20}>

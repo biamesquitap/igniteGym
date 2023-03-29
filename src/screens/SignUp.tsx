@@ -10,6 +10,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { api } from '@services/api'
 import { AppError } from '@utils/AppError'
+import { useAuth } from '@hooks/useAuth'
 
 type FormDataProps = {
   name: string;
@@ -26,6 +27,10 @@ const signUpSchema = yup.object({
 })
 
 export function SingUp() {
+  const [isLoading, setIsLoading] = useState(false)
+
+  const { signIn } = useAuth()
+
   const navigation = useNavigation()
   const toast = useToast()
 
@@ -43,11 +48,15 @@ export function SingUp() {
 
   async function handleSignUp({ name, email, password }: FormDataProps) {
     try {
-      const response = await api.post('/users', { name, email, password })
-      console.log(response.data)
-    } catch (error) {
-      const isAppError = error instanceof AppError;
+      setIsLoading(true)
 
+      await api.post('/users', { name, email, password })
+      await signIn(email, password)
+
+    } catch (error) {
+      setIsLoading(false)
+
+      const isAppError = error instanceof AppError;
       const title = isAppError ? error.message : 'Não foi possível criar a conta. Tente novamente mais tarde';
 
       toast.show({
@@ -147,6 +156,7 @@ export function SingUp() {
           <Button
             title='Criar e acessar'
             onPress={handleSubmit(handleSignUp)}
+            isLoading={isLoading}
           />
         </Center>
 

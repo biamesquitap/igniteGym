@@ -12,7 +12,7 @@ import { useTheme } from "native-base";
 
 type AppRoutes = {
   Home: undefined
-  Exercise: undefined
+  Exercise: { exerciseId: string }
   Profile: undefined
   History: undefined
 }
