@@ -20,7 +20,7 @@ export function Home() {
   const navigation = useNavigation<AppNavigatorRoutesProps>()
 
   function handleOpenExerciseDetails(exerciseId: string) {
-    navigation.navigate('Exercise', { exerciseId });
+    navigation.navigate('exercise', { exerciseId });
   }
 
   async function fetchGroups() {

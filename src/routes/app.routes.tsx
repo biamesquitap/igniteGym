@@ -11,10 +11,10 @@ import ProfileSvg from '@assets/profile.svg'
 import { useTheme } from "native-base";
 
 type AppRoutes = {
-  Home: undefined
-  Exercise: { exerciseId: string }
-  Profile: undefined
-  History: undefined
+  home: undefined
+  exercise: { exerciseId: string }
+  profile: undefined
+  history: undefined
 }
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>
@@ -41,7 +41,7 @@ export function AppRoutes() {
     }}>
 
       <Screen
-        name="Home"
+        name="home"
         component={Home}
         options={{
           tabBarIcon: ({ color }) => (
@@ -50,7 +50,7 @@ export function AppRoutes() {
         }}
       />
       <Screen
-        name="History"
+        name="history"
         component={History}
         options={{
           tabBarIcon: ({ color }) => (
@@ -60,7 +60,7 @@ export function AppRoutes() {
       />
 
       <Screen
-        name="Profile"
+        name="profile"
         component={Profile}
         options={{
           tabBarIcon: ({ color }) => (
@@ -70,7 +70,7 @@ export function AppRoutes() {
       />
 
       <Screen
-        name="Exercise"
+        name="exercise"
         component={Exercise}
         options={{ tabBarButton: () => null }}
       />
