@@ -13,6 +13,7 @@ import { useAuth } from '@hooks/useAuth';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { api } from '@services/api';
 import { AppError } from '@utils/AppError';
+import defaulUserPhotoImg from '@assets/userPhotoDefault.png';
 
 const PHOTO_SIZE = 33
 
@@ -32,9 +33,8 @@ const ProfileSchema = yup.object({
     .transform((value) => !!value ? value : null)
     .oneOf([yup.ref('password')], 'As senhas não conferem')
     .when('password', {
-      is: (Field: any) => Field,
-      then: yup
-        .string()
+      is: (Field: string) => Field,
+      then: (schema) => schema
         .nullable()
         .required('Informe a confirmação da senha.')
         .transform((value) => !!value ? value : null)
@@ -85,7 +85,33 @@ export function Profile() {
             bgColor: "red.500"
           })
         }
-        setUserPhoto(photoSelected.assets[0].uri)
+
+        const fileExtension = photoSelected.assets[0].uri.split('.').pop()
+
+        const photoFile = {
+          name: `${user.name}.${fileExtension}`.toLowerCase(),
+          uri: photoSelected.assets[0].uri,
+          type: `${photoSelected.assets[0].type}/${fileExtension}`,
+        } as any
+
+        const userPhotoUploadForm = new FormData()
+        userPhotoUploadForm.append('avatar', photoFile)
+
+        const avatarUpdatedResponse = await api.patch('/users/avatar', userPhotoUploadForm, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+
+        const userUpdated = user
+        userUpdated.avatar = avatarUpdatedResponse.data.avatar
+        updateUserProfile(userUpdated)
+
+        toast.show({
+          title: 'Foto atualizada com sucesso!',
+          placement: 'top',
+          bgColor: 'green.500'
+        })
       }
 
     } catch (error) {
@@ -140,7 +166,11 @@ export function Profile() {
               />
               :
               <UserPhoto
-                source={{ uri: userPhoto }}
+                source={
+                  user.avatar
+                    ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}` }
+                    : defaulUserPhotoImg
+                }
                 alt="Foto do usuário"
                 size={PHOTO_SIZE}
               />
